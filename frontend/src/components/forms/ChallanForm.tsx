@@ -23,8 +23,8 @@ const ChallanForm: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const custRes = await axios.get('http://localhost:5000/api/customers', { headers: { Authorization: `Bearer ${getToken()}` } });
-        const prodRes = await axios.get('http://localhost:5000/api/products', { headers: { Authorization: `Bearer ${getToken()}` } });
+        const custRes = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/customers', { headers: { Authorization: `Bearer ${getToken()}` } });
+        const prodRes = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/products', { headers: { Authorization: `Bearer ${getToken()}` } });
         setCustomers(custRes.data);
         setProducts(prodRes.data);
         if (custRes.data.length > 0) setCustomerId(custRes.data[0].id);
@@ -56,7 +56,7 @@ const ChallanForm: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/challans', { customerId, items }, {
+      const res = await axios.post('https://fundsroom-assesment-production.up.railway.app/api/challans', { customerId, items }, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       triggerRefresh();

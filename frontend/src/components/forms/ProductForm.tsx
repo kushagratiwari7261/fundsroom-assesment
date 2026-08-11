@@ -37,7 +37,7 @@ const ProductForm: React.FC = () => {
         currentStock: parseInt(formData.currentStock) || 0,
         minStockAlert: parseInt(formData.minStockAlert) || 10
       };
-      const res = await axios.post('http://localhost:5000/api/products', payload, {
+      const res = await axios.post('https://fundsroom-assesment-production.up.railway.app/api/products', payload, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       triggerRefresh();

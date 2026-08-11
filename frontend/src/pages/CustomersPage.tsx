@@ -26,7 +26,7 @@ const CustomersPage: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/customers', {
+      const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/customers', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setCustomers(response.data);
@@ -47,7 +47,7 @@ const CustomersPage: React.FC = () => {
     if (!selectedCustomer) return;
     setSavingCustomer(true);
     try {
-      await axios.put(`http://localhost:5000/api/customers/${selectedCustomer.id}`, {
+      await axios.put(`https://fundsroom-assesment-production.up.railway.app/api/customers/${selectedCustomer.id}`, {
         notes: editNotes,
         followUpDate: editFollowUpDate ? new Date(editFollowUpDate).toISOString() : null
       }, {

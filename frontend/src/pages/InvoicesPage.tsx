@@ -28,7 +28,7 @@ const InvoicesPage: React.FC = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/challans', {
+      const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/challans', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       // ONLY SHOW CONFIRMED CHALLANS IN THE INVOICES TAB

@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated()) {
-      axios.get('http://localhost:5000/api/notifications', {
+      axios.get('https://fundsroom-assesment-production.up.railway.app/api/notifications', {
         headers: { Authorization: `Bearer ${getToken()}` }
       }).then(res => setNotifications(res.data)).catch(console.error);
     }

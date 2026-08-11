@@ -23,7 +23,7 @@ const ProductsPage: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products', {
+      const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/products', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setProducts(response.data);
@@ -38,7 +38,7 @@ const ProductsPage: React.FC = () => {
     setHistoryProduct(product);
     setHistoryLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/products/${product.id}/history`, {
+      const res = await axios.get(`https://fundsroom-assesment-production.up.railway.app/api/products/${product.id}/history`, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setHistoryData(res.data);

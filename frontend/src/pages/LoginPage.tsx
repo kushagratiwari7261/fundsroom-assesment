@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       // Point this to your backend URL
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://fundsroom-assesment-production.up.railway.app/api/auth/login', {
         email,
         password
       });

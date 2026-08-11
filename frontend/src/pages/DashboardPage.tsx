@@ -16,7 +16,7 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/dashboard/stats', {
+        const res = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/dashboard/stats', {
           headers: { Authorization: `Bearer ${getToken()}` }
         });
         setStats(res.data);

@@ -21,7 +21,7 @@ const ChallansPage: React.FC = () => {
 
   const fetchChallans = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/challans', {
+      const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/challans', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setChallans(response.data);
@@ -34,7 +34,7 @@ const ChallansPage: React.FC = () => {
 
   const updateStatus = async (id: string, action: 'confirm' | 'cancel') => {
     try {
-      await axios.put(`http://localhost:5000/api/challans/${id}/${action}`, {}, {
+      await axios.put(`https://fundsroom-assesment-production.up.railway.app/api/challans/${id}/${action}`, {}, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       showToast?.(`Challan ${action === 'confirm' ? 'Confirmed (Stock Deducted)' : 'Cancelled'}!`, 'SUCCESS');

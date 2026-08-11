@@ -18,7 +18,7 @@ const CustomerForm: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/customers', formData, {
+      const res = await axios.post('https://fundsroom-assesment-production.up.railway.app/api/customers', formData, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       triggerRefresh();
