@@ -23,11 +23,25 @@ const Layout: React.FC = () => {
     navigate('/login');
   };
 
+  // Wake up Railway backend immediately on app load (cold start fix)
+  useEffect(() => {
+    axios.get('https://fundsroom-assesment-production.up.railway.app/').catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated()) {
-      axios.get('https://fundsroom-assesment-production.up.railway.app/api/notifications', {
-        headers: { Authorization: `Bearer ${getToken()}` }
-      }).then(res => setNotifications(res.data)).catch(console.error);
+      // Fire notifications + prefetch common data in parallel to warm DB connections
+      Promise.all([
+        axios.get('https://fundsroom-assesment-production.up.railway.app/api/notifications', {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        }).then(res => setNotifications(res.data)),
+        axios.get('https://fundsroom-assesment-production.up.railway.app/api/customers', {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        }),
+        axios.get('https://fundsroom-assesment-production.up.railway.app/api/products', {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        }),
+      ]).catch(console.error);
     }
   }, [refreshTrigger]);
 
