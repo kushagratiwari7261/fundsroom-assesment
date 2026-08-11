@@ -18,34 +18,69 @@ router.get('/stats', async (req: AuthRequest, res) => {
 
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+    // SUPABASE FREE TIER CONNECTION FIX:
+    // By placing ALL queries into a single prisma.$transaction array, 
+    // Prisma guarantees they execute over exactly ONE database connection 
+    // in a single network round-trip. This completely bypasses the 
+    // Supabase strict connection limit queueing issues!
+    const [
+      // Accounts 
+      confirmedChallanCount,
+      confirmedChallanItems,
+      recentConfirmedItems,
+      recentChallansFeed,
+      
+      // Sales
+      totalCustomers,
+      totalChallans,
+      draftChallans,
+      recentChallans,
+      recentCustomers,
+      
+      // Warehouse
+      totalProducts,
+      products,
+      recentMovements,
+      totalItemsDispatched
+    ] = await prisma.$transaction([
+      // Accounts 
+      prisma.challan.count({ where: { status: 'CONFIRMED' } }),
+      prisma.challanItem.findMany({ where: { challan: { status: 'CONFIRMED' } }, select: { unitPrice: true, quantity: true } }),
+      prisma.challanItem.findMany({ where: { challan: { status: 'CONFIRMED', createdAt: { gte: sevenDaysAgo } } }, select: { unitPrice: true, quantity: true, challan: { select: { createdAt: true } } } }),
+      prisma.challan.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { customer: true } }),
+      
+      // Sales
+      prisma.customer.count(),
+      prisma.challan.count(),
+      prisma.challan.count({ where: { status: 'DRAFT' } }),
+      prisma.challan.findMany({ where: { createdAt: { gte: sevenDaysAgo } }, select: { createdAt: true } }),
+      prisma.customer.findMany({ take: 5, orderBy: { createdAt: 'desc' } }),
+      
+      // Warehouse
+      prisma.product.count(),
+      prisma.product.findMany({ orderBy: { currentStock: 'asc' } }),
+      prisma.stockMovement.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { product: true } }),
+      prisma.stockMovement.aggregate({ _sum: { quantity: true }, where: { type: 'OUT' } })
+    ]);
+
     let responsePayload: any = { role };
 
     if (role === 'ADMIN' || role === 'ACCOUNTS') {
-      const [confirmedChallans, recentConfirmed, recentChallansFeed] = await Promise.all([
-        prisma.challan.findMany({ where: { status: 'CONFIRMED' }, include: { items: true } }),
-        prisma.challan.findMany({ where: { status: 'CONFIRMED', createdAt: { gte: sevenDaysAgo } }, include: { items: true } }),
-        prisma.challan.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { customer: true } }),
-      ]);
-
       let totalRevenue = 0;
-      confirmedChallans.forEach((c: any) => {
-        c.items.forEach((i: any) => { totalRevenue += i.unitPrice * i.quantity; });
-      });
+      confirmedChallanItems.forEach((i: any) => { totalRevenue += i.unitPrice * i.quantity; });
 
       const revenueMap = new Map();
       for (let i = 6; i >= 0; i--) {
         const d = new Date(); d.setDate(today.getDate() - i);
         revenueMap.set(days[d.getDay()], 0);
       }
-      recentConfirmed.forEach((c: any) => {
-        const dayName = days[c.createdAt.getDay()];
-        let rev = 0;
-        c.items.forEach((i: any) => { rev += i.unitPrice * i.quantity; });
-        if (revenueMap.has(dayName)) revenueMap.set(dayName, revenueMap.get(dayName) + rev);
+      recentConfirmedItems.forEach((i: any) => {
+        const dayName = days[i.challan.createdAt.getDay()];
+        if (revenueMap.has(dayName)) revenueMap.set(dayName, revenueMap.get(dayName) + (i.unitPrice * i.quantity));
       });
 
       responsePayload.financials = {
-        totalConfirmedChallans: confirmedChallans.length,
+        totalConfirmedChallans: confirmedChallanCount,
         totalRevenue,
         revenueChart: Array.from(revenueMap.entries()).map(([name, revenue]) => ({ name, revenue })),
         recentChallans: recentChallansFeed
@@ -53,14 +88,6 @@ router.get('/stats', async (req: AuthRequest, res) => {
     }
 
     if (role === 'ADMIN' || role === 'SALES') {
-      const [totalCustomers, totalChallans, draftChallans, recentChallans, recentCustomers] = await Promise.all([
-        prisma.customer.count(),
-        prisma.challan.count(),
-        prisma.challan.count({ where: { status: 'DRAFT' } }),
-        prisma.challan.findMany({ where: { createdAt: { gte: sevenDaysAgo } }, select: { createdAt: true } }),
-        prisma.customer.findMany({ take: 5, orderBy: { createdAt: 'desc' } }),
-      ]);
-
       const challanMap = new Map();
       for (let i = 6; i >= 0; i--) {
         const d = new Date(); d.setDate(today.getDate() - i);
@@ -81,13 +108,6 @@ router.get('/stats', async (req: AuthRequest, res) => {
     }
 
     if (role === 'ADMIN' || role === 'WAREHOUSE') {
-      const [totalProducts, products, recentMovements, totalItemsDispatched] = await Promise.all([
-        prisma.product.count(),
-        prisma.product.findMany({ orderBy: { currentStock: 'asc' } }),
-        prisma.stockMovement.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { product: true } }),
-        prisma.stockMovement.aggregate({ _sum: { quantity: true }, where: { type: 'OUT' } }),
-      ]);
-
       const lowStockCount = products.filter((p: any) => p.currentStock <= p.minStockAlert).length;
 
       responsePayload.inventory = {
