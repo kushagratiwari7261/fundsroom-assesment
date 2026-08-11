@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
 router.put('/:id', requireRoles(['ADMIN', 'WAREHOUSE']), async (req: AuthRequest, res) => {
   try {
     const { currentStock, reason, ...updateData } = req.body;
-    const productId = req.params.id;
+    const productId = String(req.params.id);
     const userId = req.user.id;
 
     if (currentStock !== undefined && (isNaN(Number(currentStock)) || Number(currentStock) < 0)) {
@@ -102,7 +102,7 @@ router.put('/:id', requireRoles(['ADMIN', 'WAREHOUSE']), async (req: AuthRequest
 router.get('/:id/history', async (req, res) => {
   try {
     const movements = await prisma.stockMovement.findMany({
-      where: { productId: req.params.id },
+      where: { productId: String(req.params.id) },
       orderBy: { createdAt: 'desc' },
       include: {
         user: { select: { name: true } }

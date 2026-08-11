@@ -108,7 +108,7 @@ router.post('/', requireRoles(['ADMIN', 'SALES']), async (req: AuthRequest, res)
 // Confirm Draft Challan
 router.put('/:id/confirm', requireRoles(['ADMIN', 'SALES']), async (req: AuthRequest, res) => {
   try {
-    const challanId = req.params.id;
+    const challanId = String(req.params.id);
     const userId = req.user.id;
 
     const confirmedChallan = await prisma.$transaction(async (tx: any) => {
@@ -172,7 +172,7 @@ router.get('/', async (req, res) => {
 // Cancel Challan (Handles Draft and Confirmed)
 router.put('/:id/cancel', requireRoles(['ADMIN', 'SALES']), async (req: AuthRequest, res) => {
   try {
-    const challanId = req.params.id;
+    const challanId = String(req.params.id);
     const userId = req.user.id;
 
     const cancelledChallan = await prisma.$transaction(async (tx: any) => {

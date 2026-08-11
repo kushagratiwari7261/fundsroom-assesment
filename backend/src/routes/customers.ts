@@ -50,7 +50,7 @@ router.get('/', async (req, res) => {
 // Get customer by ID
 router.get('/:id', async (req, res) => {
   try {
-    const customer = await prisma.customer.findUnique({ where: { id: req.params.id } });
+    const customer = await prisma.customer.findUnique({ where: { id: String(req.params.id) } });
     if (!customer) return res.status(404).json({ error: 'Customer not found' });
     res.json(customer);
   } catch (error: any) {
@@ -68,7 +68,7 @@ router.put('/:id', requireRoles(['ADMIN', 'SALES']), async (req, res) => {
     if (status && !['LEAD', 'ACTIVE', 'INACTIVE'].includes(status)) return res.status(400).json({ error: 'Invalid status provided' });
 
     const customer = await prisma.customer.update({
-      where: { id: req.params.id },
+      where: { id: String(req.params.id) },
       data: req.body
     });
     res.json(customer);
