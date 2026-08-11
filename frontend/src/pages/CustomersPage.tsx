@@ -96,7 +96,23 @@ const CustomersPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div style={{ padding: '20px', textAlign: 'center' }}>Loading customers...</div>
+          <>
+            <style>{`
+              @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+              .skel { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+            `}</style>
+            <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                  <div className="skel" style={{ width: '25%', height: '18px' }}></div>
+                  <div className="skel" style={{ width: '15%', height: '18px' }}></div>
+                  <div className="skel" style={{ width: '12%', height: '18px' }}></div>
+                  <div className="skel" style={{ width: '10%', height: '24px', borderRadius: '12px' }}></div>
+                  <div className="skel" style={{ width: '10%', height: '18px', marginLeft: 'auto' }}></div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>

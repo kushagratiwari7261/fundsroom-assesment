@@ -29,7 +29,24 @@ const DashboardPage: React.FC = () => {
     fetchStats();
   }, []);
 
-  if (loading) return <div style={{ padding: '20px' }}>Loading ERP Dashboard...</div>;
+  if (loading) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: 'Arial, sans-serif' }}>
+      <style>{`
+        @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+        .skel { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 400px 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+      `}</style>
+      <div style={{ borderBottom: '2px solid #343a40', paddingBottom: '10px' }}>
+        <div className="skel" style={{ width: '220px', height: '28px' }}></div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
+        {[1,2,3].map(i => <div key={i} className="skel" style={{ height: '110px', borderRadius: '4px' }}></div>)}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+        <div className="skel" style={{ height: '380px', borderRadius: '4px' }}></div>
+        <div className="skel" style={{ height: '380px', borderRadius: '4px' }}></div>
+      </div>
+    </div>
+  );
 
   const role = stats?.role || getUserRole();
 
