@@ -11,6 +11,8 @@ interface FormContextType {
   triggerRefresh: () => void;
   showToast: (message: string, type: 'SUCCESS' | 'ERROR') => void;
   hideToast: () => void;
+  apiCache: Record<string, any>;
+  setApiCache: (key: string, data: any) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -20,6 +22,12 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isMinimized, setIsMinimized] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [toast, setToast] = useState<{ message: string, type: 'SUCCESS' | 'ERROR' } | null>(null);
+  
+  // GLOBAL FRONTEND CACHE
+  const [apiCache, setApiCacheState] = useState<Record<string, any>>({});
+  const setApiCache = (key: string, data: any) => {
+    setApiCacheState(prev => ({ ...prev, [key]: data }));
+  };
 
   const openForm = (formType: 'customer' | 'product' | 'challan') => {
     setActiveForm(formType);
@@ -28,7 +36,10 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const closeForm = () => setActiveForm(null);
   const toggleMinimize = () => setIsMinimized(!isMinimized);
-  const triggerRefresh = () => setRefreshTrigger(prev => prev + 1);
+  const triggerRefresh = () => {
+    setApiCacheState({}); // Bust the entire cache when a mutation occurs!
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const showToast = (message: string, type: 'SUCCESS' | 'ERROR') => {
     setToast({ message, type });
@@ -40,7 +51,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const hideToast = () => setToast(null);
 
   return (
-    <FormContext.Provider value={{ activeForm, isMinimized, refreshTrigger, toast, openForm, closeForm, toggleMinimize, triggerRefresh, showToast, hideToast }}>
+    <FormContext.Provider value={{ activeForm, isMinimized, refreshTrigger, toast, openForm, closeForm, toggleMinimize, triggerRefresh, showToast, hideToast, apiCache, setApiCache }}>
       {children}
     </FormContext.Provider>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getToken, getUserRole } from '../utils/auth';
+import { useFormContext } from '../context/FormContext';
 import { 
   Users, Package, FileText, AlertTriangle, 
   BarChart2, List, DollarSign, TrendingDown
@@ -12,14 +13,21 @@ import {
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { apiCache, setApiCache, refreshTrigger } = useFormContext();
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (apiCache['dashboard']) {
+        setStats(apiCache['dashboard']);
+        setLoading(false);
+        return;
+      }
       try {
         const res = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/dashboard/stats', {
           headers: { Authorization: `Bearer ${getToken()}` }
         });
         setStats(res.data);
+        setApiCache('dashboard', res.data);
       } catch (error) {
         console.error('Failed to fetch stats', error);
       } finally {
@@ -27,7 +35,7 @@ const DashboardPage: React.FC = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [refreshTrigger, apiCache, setApiCache]);
 
   if (loading) return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: 'Arial, sans-serif' }}>

@@ -16,20 +16,26 @@ const CustomersPage: React.FC = () => {
   const [editFollowUpDate, setEditFollowUpDate] = useState('');
   const [savingCustomer, setSavingCustomer] = useState(false);
 
-  const { openForm, refreshTrigger, showToast } = useFormContext();
+  const { openForm, refreshTrigger, showToast, apiCache, setApiCache } = useFormContext();
   const role = getUserRole();
   const itemsPerPage = 8;
 
   useEffect(() => {
     fetchCustomers();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, apiCache, setApiCache]);
 
   const fetchCustomers = async () => {
+    if (apiCache['customers']) {
+      setCustomers(apiCache['customers']);
+      setLoading(false);
+      return;
+    }
     try {
       const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/customers', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setCustomers(response.data);
+      setApiCache('customers', response.data);
     } catch (error) {
       console.error('Failed to fetch customers:', error);
     } finally {

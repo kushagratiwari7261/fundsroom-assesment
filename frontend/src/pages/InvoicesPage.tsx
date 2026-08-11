@@ -19,20 +19,26 @@ const InvoicesPage: React.FC = () => {
     documentTitle: selectedInvoice ? `Invoice_${selectedInvoice.challanNumber}` : 'Invoice',
   });
 
-  const { refreshTrigger } = useFormContext();
+  const { refreshTrigger, apiCache, setApiCache } = useFormContext();
   const itemsPerPage = 8;
 
   useEffect(() => {
     fetchInvoices();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, apiCache, setApiCache]);
 
   const fetchInvoices = async () => {
+    if (apiCache['invoices']) {
+      setInvoices(apiCache['invoices'].filter((c: any) => c.status === 'CONFIRMED'));
+      setLoading(false);
+      return;
+    }
     try {
       const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/challans', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       // ONLY SHOW CONFIRMED CHALLANS IN THE INVOICES TAB
       setInvoices(response.data.filter((c: any) => c.status === 'CONFIRMED'));
+      setApiCache('invoices', response.data);
     } catch (error) {
       console.error('Failed to fetch invoices:', error);
     } finally {

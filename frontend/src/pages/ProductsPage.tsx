@@ -13,20 +13,26 @@ const ProductsPage: React.FC = () => {
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   
-  const { openForm, refreshTrigger } = useFormContext();
+  const { openForm, refreshTrigger, apiCache, setApiCache } = useFormContext();
   const role = getUserRole();
   const itemsPerPage = 8;
 
   useEffect(() => {
     fetchProducts();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, apiCache, setApiCache]);
 
   const fetchProducts = async () => {
+    if (apiCache['products']) {
+      setProducts(apiCache['products']);
+      setLoading(false);
+      return;
+    }
     try {
       const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/products', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setProducts(response.data);
+      setApiCache('products', response.data);
     } catch (error) {
       console.error('Failed to fetch products:', error);
     } finally {

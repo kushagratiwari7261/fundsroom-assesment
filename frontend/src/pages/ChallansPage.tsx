@@ -11,20 +11,26 @@ const ChallansPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedChallan, setSelectedChallan] = useState<any | null>(null);
 
-  const { openForm, refreshTrigger, showToast } = useFormContext();
+  const { openForm, refreshTrigger, showToast, apiCache, setApiCache, triggerRefresh } = useFormContext();
   const role = getUserRole();
   const itemsPerPage = 8;
 
   useEffect(() => {
     fetchChallans();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, apiCache, setApiCache]);
 
   const fetchChallans = async () => {
+    if (apiCache['challans']) {
+      setChallans(apiCache['challans']);
+      setLoading(false);
+      return;
+    }
     try {
       const response = await axios.get('https://fundsroom-assesment-production.up.railway.app/api/challans', {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       setChallans(response.data);
+      setApiCache('challans', response.data);
     } catch (error) {
       console.error('Failed to fetch challans:', error);
     } finally {
@@ -38,7 +44,7 @@ const ChallansPage: React.FC = () => {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       showToast?.(`Challan ${action === 'confirm' ? 'Confirmed (Stock Deducted)' : 'Cancelled'}!`, 'SUCCESS');
-      fetchChallans();
+      triggerRefresh(); // Force refresh for stock updates
     } catch (error: any) {
       showToast?.(error.response?.data?.error || 'Failed to update challan', 'ERROR');
     }
