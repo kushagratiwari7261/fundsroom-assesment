@@ -13,6 +13,7 @@ interface FormContextType {
   hideToast: () => void;
   apiCache: Record<string, any>;
   setApiCache: (key: string, data: any) => void;
+  clearCache: () => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -28,6 +29,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const setApiCache = (key: string, data: any) => {
     setApiCacheState(prev => ({ ...prev, [key]: data }));
   };
+  const clearCache = () => setApiCacheState({});
 
   const openForm = (formType: 'customer' | 'product' | 'challan') => {
     setActiveForm(formType);
@@ -37,7 +39,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const closeForm = () => setActiveForm(null);
   const toggleMinimize = () => setIsMinimized(!isMinimized);
   const triggerRefresh = () => {
-    setApiCacheState({}); // Bust the entire cache when a mutation occurs!
+    clearCache();
     setRefreshTrigger(prev => prev + 1);
   };
 
@@ -51,7 +53,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const hideToast = () => setToast(null);
 
   return (
-    <FormContext.Provider value={{ activeForm, isMinimized, refreshTrigger, toast, openForm, closeForm, toggleMinimize, triggerRefresh, showToast, hideToast, apiCache, setApiCache }}>
+    <FormContext.Provider value={{ activeForm, isMinimized, refreshTrigger, toast, openForm, closeForm, toggleMinimize, triggerRefresh, showToast, hideToast, apiCache, setApiCache, clearCache }}>
       {children}
     </FormContext.Provider>
   );

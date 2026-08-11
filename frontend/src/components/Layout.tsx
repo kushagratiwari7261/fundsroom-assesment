@@ -16,10 +16,11 @@ const Layout: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const { activeForm, isMinimized, closeForm, toggleMinimize, refreshTrigger, toast, hideToast } = useFormContext();
+  const { activeForm, isMinimized, closeForm, toggleMinimize, refreshTrigger, toast, hideToast, clearCache } = useFormContext();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    clearCache();
     navigate('/login');
   };
 
