@@ -16,7 +16,7 @@ Open `backend/src/index.ts` in VS Code.
 > 
 > The architecture uses a React frontend powered by Vite, and a Node.js Express backend. For the database, I am using PostgreSQL hosted on Supabase, managed entirely by the Prisma ORM. 
 > 
-> My system features Role-Based Access Control, real-time inventory gating, and a Tax Invoice PDF generator."
+> My system features Role-Based Access Control, real-time inventory gating, a custom memory cache, and automated CI/CD pipelines."
 
 ---
 
@@ -27,28 +27,30 @@ Switch to `backend/src/middlewares/auth.ts`, then switch to the **Live Browser (
 **🗣️ What to say:**
 > "Security is handled via JSON Web Tokens (JWT). In my backend middleware, every route is protected, and specific routes enforce Role-Based Access Control. For example, a Warehouse manager cannot access Financial routes. 
 > 
-> Let's log into the live system as an Admin to see the full capabilities. Notice that I added a 'warm-up ping' on the login page so the backend wakes up instantly from its serverless sleep state while I type."
-> *(Type in `admin@fundsroom.com` and `password123`, then click Sign In)*
+> Let's log into the live system as an Admin. Notice that I added a 'warm-up ping' on the login page so the backend wakes up instantly from its serverless sleep state while I type."
+> *(Type in `admin@fundsroom.com` and `password123`, then click Login as Admin)*
 
 ---
 
-## ⏱️ 1:00 - The Dashboard & UI/UX
+## ⏱️ 1:00 - The Dashboard & Database Optimizations
 **👀 What to show on screen:** 
-**Live Browser (Dashboard Page)**. Scroll around to show the charts and KPI cards.
+**Live Browser (Dashboard Page)**. Scroll around to show the charts and KPI cards, then quickly flash `backend/src/routes/dashboard.ts` in VS Code.
 
 **🗣️ What to say:**
 > "Upon logging in, we hit the Analytics Dashboard. I designed this using an enterprise 'Spring Boot' aesthetic—clean panels, sharp contrast, and Recharts for interactive data visualization. 
 > 
-> To ensure high performance, the dashboard aggregates data using highly optimized, parallelized Prisma queries in the backend. You can see our financial metrics, CRM data, and live inventory alerts all separated logically."
+> To ensure high performance on the Supabase free tier, I heavily optimized my database queries. I batched all 12 dashboard queries into a single `prisma.$transaction` array. This forces Prisma to execute everything over a single database connection in one network round-trip, completely bypassing connection limit bottlenecks."
 
 ---
 
-## ⏱️ 1:30 - CRM & Email Automation
+## ⏱️ 1:30 - Global Client Cache & CRM
 **👀 What to show on screen:** 
-Click on **Customers** in the sidebar. Click "Add Customer". Then open `backend/src/utils/email.ts` in VS Code briefly.
+Click on **Customers**, then quickly click back to **Dashboard**, then back to **Customers** to show how instantly it loads.
 
 **🗣️ What to say:**
-> "In the Customers module, the Sales team can onboard new clients. I implemented the Resend Email API into the backend. Whenever a new customer is registered, the system automatically fires a beautifully formatted HTML Welcome Email directly to their inbox using a background process."
+> "Notice how fast the pages load when switching tabs. I built a Global Client-Side Memory Cache using React Context. The first time a page loads, it caches the data. Subsequent visits pull straight from memory in zero milliseconds. 
+> 
+> The cache is also smart—whenever we mutate data, like adding a new Customer or confirming a Challan, the system automatically invalidates the cache so we always see fresh data."
 
 ---
 
@@ -85,9 +87,11 @@ Click on **Tax Invoices** in the sidebar. Click **"Print / Download"** on an inv
 
 ---
 
-## ⏱️ 3:45 - Conclusion
+## ⏱️ 3:45 - CI/CD Pipeline & Conclusion
 **👀 What to show on screen:** 
-Open the **Profile Dropdown** in the top right corner and click **Logout**.
+Open `.github/workflows/ci-cd.yml` in VS Code.
 
 **🗣️ What to say:**
-> "This system was fully deployed using Railway for the backend and Vercel for the frontend. Thank you for your time, and I look forward to your feedback on my code and architecture."
+> "Lastly, I implemented a robust CI/CD Pipeline using GitHub Actions. Whenever code is pushed, the pipeline runs parallel jobs to type-check and build both the frontend and backend. Only if both checks pass does it trigger the automated deployments to Vercel and Railway.
+> 
+> Thank you for your time, and I look forward to your feedback on my code and architecture."

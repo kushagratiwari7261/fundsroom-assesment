@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
+import { useFormContext } from '../context/FormContext';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -11,6 +12,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { clearCache } = useFormContext();
 
   // Wake up Railway backend while user types credentials
   useEffect(() => {
@@ -36,6 +38,9 @@ const LoginPage: React.FC = () => {
 
       const { token } = response.data;
       localStorage.setItem('token', token);
+      
+      // FORCED CACHE CLEAR: Fixes bug where using shortcuts bypasses logout clear
+      clearCache();
 
       // Redirect to dashboard
       navigate('/');
